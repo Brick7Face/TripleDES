@@ -1,0 +1,6 @@
+void_main(java.lang.String[])
+javax.crypto.SecretKey_generateKey()
+void_writeKey(javax.crypto.SecretKey,java.io.File)
+javax.crypto.SecretKey_readKey(java.io.File)
+void_encrypt(javax.crypto.SecretKey,java.io.InputStream,java.io.OutputStream)
+void_decrypt(javax.crypto.SecretKey,java.io.InputStream,java.io.OutputStream)

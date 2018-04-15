@@ -1,0 +1,72 @@
+﻿-decrypted text length should always equal original plaintext length
+-key size is always 64 bits (56 bits generated)
+-plaintext and cipher text should be 64bits
+	-plaintexts greater than 64bits should be truncated
+	-would two different strings with the same first 64bits cipher the same?
+	
+-should not decrypt to "V¢o˜å•¿×" if "test" is used as cipher
+-doing key generation twice should not result in the same key
+
+PUT flow
+-generate key, write to file
+-encrypt plaintext using key, DESede algorithm (from Cipher class - test this?)
+	-clear memory afterward
+-decrypt cipher using key, print result to stdout
+
+
+
+MRs
+-encrypts "test" to "V¢o˜å•¿×" using "L³ï\n¿˜ã«1Rº|*8*\n4/7z¿" for key
+	1) using different key to decrypt "V¢o˜å•¿×" should NOT equal "test"
+		1. generate completely new key		//test big difference
+		2. use key "K³ï\n¿˜ã«1Rº|*8*\n4/7z¿"	//test front edge case
+		3. use key "M³ï\n¿˜ã«1Rº|*8*\n4/7z¿"	//test front edge case
+		4. use key "L³ï\n¿˜ã«1Rº|*8*\n4/7z¾"	//test back edge case
+		5. use key "L³ï\n¿˜ã«1Rº|*8*\n4/7zÀ"	//test back edge case
+		-use key "à)ÕýÁÖËT=—®ïÎm­zÎ¢J¨X", plaintext "mouse" encrypts to "y·jÐŒ9Mø", same tests (5 more)
+			6. new key
+			7. ß)ÕýÁÖËT=—®ïÎm­zÎ¢J¨X
+			8. à)ÕýÁÖËT=—®ïÎm­zÎ¢J¨X
+			9. à)ÕýÁÖËT=—®ïÎm­zÎ¢J¨W
+			10. à)ÕýÁÖËT=—®ïÎm­zÎ¢J¨Y
+			
+	2) using slightly different cipher should NOT decrypt to test, or close to test
+		-using "test" with one character changed to next ASCII value, should not encrypt to similar cipher
+			1. encrypt "tdst" and make sure first and last characters of cipher are different
+			2. encrypt "tesu" ...
+			3. using cipher "U¢o˜å•¿×" should not decrypt to string with first, last characters similar to test
+			4. using cipher "V¢o˜å•¾×" ...
+		-try random string generation with random length and characters
+			5. encrypt random string, get cipher, change cipher by 1 character, decrypt, compare string original 
+			6. encrypt "tdst" and make sure first and last characters of cipher are different - check full word
+			7. encrypt "tesu" ... - check full word
+			8. using cipher "U¢o˜å•¿×" should not decrypt to string with first, last characters similar to test - check full word
+			9. using cipher "V¢o˜å•¾×" ... - check full word
+			10. randomly generate cipher, get decryption, change cipher by 1 character, decrypt, compare both decryptions
+			
+	3a) Original input - decrypting "V¢o˜å•¿×" results in "test" with key "L³ï\n¿˜ã«1Rº|*8*\n4/7z¿"
+		Follow ups:
+			1. Generating new key and encrypting "test" should not result in "V¢o˜å•¿×"
+			2. use key "K³ï\n¿˜ã«1Rº|*8*\n4/7z¿"	//test front edge case
+			3. use key "M³ï\n¿˜ã«1Rº|*8*\n4/7z¿"	//test front edge case
+			4. use key "L³ï\n¿˜ã«1Rº|*8*\n4/7z¾"	//test back edge case
+			5. use key "L³ï\n¿˜ã«1Rº|*8*\n4/7zÀ"	//test back edge case
+			6. encrypt random string, change cipher by 1 character, decrypt, should not be same
+			7. 
+			8.
+			9.
+			10.
+		
+	3) encrypting the cipher and then decrypting the second cipher twice should still return the plaintext - MR isn't fit for this implementation
+			1. encrypt "test" twice, decrypt result twice, should result in "test"
+				2. encrypt random string twice, ...
+				3. ...
+				4. ...
+				5. encrypt random string twice, change cipher by 1 character, decrypt, should not be same
+				6. ...
+				7. encrypt random string, change cipher by 1 character, encrypt, decrypt twice, should not be same
+				8. ...
+				9. encrypt random string, change cipher by 1 character, encrypt, decrypt, should be same as changed cipher
+				10. encrypt random string, increase cipher character by 1, encrypt, decrease character by 1, decrypt twice, compare original (should not be same)
+
+

@@ -44,29 +44,23 @@ MRs
 			9. using cipher "V¢o˜å•¾×" ... - check full word
 			10. randomly generate cipher, get decryption, change cipher by 1 character, decrypt, compare both decryptions
 			
-	3a) Original input - decrypting "V¢o˜å•¿×" results in "test" with key "L³ï\n¿˜ã«1Rº|*8*\n4/7z¿"
+	3) Original input - decrypting "V¢o˜å•¿×" results in "test" with key "L³ï\n¿˜ã«1Rº|*8*\n4/7z¿"
 		Follow ups:
-			1. Generating new key and encrypting "test" should not result in "V¢o˜å•¿×"
-			2. use key "K³ï\n¿˜ã«1Rº|*8*\n4/7z¿"	//test front edge case
-			3. use key "M³ï\n¿˜ã«1Rº|*8*\n4/7z¿"	//test front edge case
-			4. use key "L³ï\n¿˜ã«1Rº|*8*\n4/7z¾"	//test back edge case
-			5. use key "L³ï\n¿˜ã«1Rº|*8*\n4/7zÀ"	//test back edge case
-			6. encrypt random string, change cipher by 1 character, decrypt, should not be same
-			7. 
-			8.
-			9.
-			10.
+			1. Generating new key and encrypting "test" should not result in the same cipher -- this passes
+			2. use key "K³ï\n¿˜ã«1Rº|*8*\n4/7z¿"	//test front edge case					 -- this passes
+			3. use key "M³ï\n¿˜ã«1Rº|*8*\n4/7z¿"	//test front edge case					 -- this fails
+			4. use key "L³ï\n¿˜ã«1Rº|*8*\n4/7z¾"	//test back edge case					 -- this fails
+			5. use key "L³ï\n¿˜ã«1Rº|*8*\n4/7zÀ"	//test back edge case					 -- this fails
+			6. encrypt random string, decrypt using different key, not equal			-- fails
+			7. decrypt random string, encrypt using different key, not equal
+			8. repeat 1 for "mouse"
+			9. repeat 2 for "mouse"
+			10. repeat 3 for "mouse"													-- fails
+			
+Questions:
+ - it turns out that the same input on the same key does not always encrypt to the same thing; I think that the cipher is generated other ways (made more general)
+ - in my MRs, it turns out that a similar key usage does in fact encrypt plaintexts to similar ciphers, though this is not true for decryption
+ - PIT class file reverser eclipse plugin (for PIT mutants)
 		
-	3) encrypting the cipher and then decrypting the second cipher twice should still return the plaintext - MR isn't fit for this implementation
-			1. encrypt "test" twice, decrypt result twice, should result in "test"
-				2. encrypt random string twice, ...
-				3. ...
-				4. ...
-				5. encrypt random string twice, change cipher by 1 character, decrypt, should not be same
-				6. ...
-				7. encrypt random string, change cipher by 1 character, encrypt, decrypt twice, should not be same
-				8. ...
-				9. encrypt random string, change cipher by 1 character, encrypt, decrypt, should be same as changed cipher
-				10. encrypt random string, increase cipher character by 1, encrypt, decrease character by 1, decrypt twice, compare original (should not be same)
 
 

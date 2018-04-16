@@ -33,11 +33,11 @@ public class TestTripleDES {
 	final String name = "3des.key";
 	String[] args = {"-g", name};
 	SecretKey key;
-	final File f = new File(name);
+	final File keyFile = new File(name);
 
 	public void setUp() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
 		TripleDES.main(args);
-		key = TripleDES.readKey(f);
+		key = TripleDES.readKey(keyFile);
 	}
 
 	/* Metamorphic Relation cases - source test cases and follow up tests */
@@ -62,15 +62,14 @@ public class TestTripleDES {
 	}
 
 
-	//helper method - encrypts "test" to "V¢o˜å•¿×" using "L³ï\n¿˜ã«1Rº|*8*\n4/7z¿" for key
+	//helper method - encrypts "test" using "L³ï\n¿˜ã«1Rº|*8*\n4/7z¿" for key
 	public void hardTestEncrypt() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, NoSuchPaddingException {
-		File f = new File("test.key");
-		key = TripleDES.readKey(f);
+		key = TripleDES.readKey(new File("test.key"));
 		setUpFile("test.txt", "test");
 		TripleDES.encrypt(key, System.in, System.out);
 	}
 
-	//helper method 2 - test encryption of "mouse", end cipher is "y·jÐŒ9Mø"
+	//helper method 2 - test encryption of "mouse"
 	public void hardTestEncryptTwo() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, NoSuchPaddingException {
 		File f = new File("mouse.key");
 		key = TripleDES.readKey(f);
@@ -80,7 +79,7 @@ public class TestTripleDES {
 
 	//metamorphic test cases - follow ups from hardTestEncrypt()
 
-	//using different key to decrypt "V¢o˜å•¿×" should NOT equal "test"
+	//using different key to decrypt cipher should NOT equal "test"
 	@Test
 	public void testMROneOne() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException {
 		//set up initial input in test.txt
@@ -363,6 +362,7 @@ public class TestTripleDES {
 	}
 
 	//similar to the first test but using a similarity counter
+	@Test
 	public void testMRTwoSix() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException {
 		//initial input in test.txt
 		hardTestEncrypt();
@@ -390,7 +390,7 @@ public class TestTripleDES {
 		assertTrue(simCount < (cArr.length / 2 + 1)); 	//if the similarity counter is greater than half the length of the original plus one, too similar
 		br.close();
 	}
-	
+
 	//similar to the first test, encrypt "tesu" and test using similarity counter
 	@Test
 	public void testMRTwoSeven() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException {
@@ -419,7 +419,7 @@ public class TestTripleDES {
 		assertTrue(simCount < (cArr.length / 2 + 1)); 	//if the similarity counter is greater than half the length of the original plus one, too similar
 		br.close();
 	}
-	
+
 	//using cipher "U¢o˜å•¿×" should not decrypt to string with similar to test using similarity counter
 	@Test
 	public void testMRTwoEight() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException {
@@ -444,7 +444,7 @@ public class TestTripleDES {
 		assertTrue(simCount < (pArr.length / 2 + 1)); 	//if the similarity counter is greater than half the length of the original plus one, too similar
 		br.close();
 	}
-	
+
 	//similar to last test, using cipher "V¢o˜å•¾×" using similarity counter
 	@Test
 	public void testMRTwoNine() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException {
@@ -496,148 +496,182 @@ public class TestTripleDES {
 		br.close();
 	}
 
-	//helper method to encrypt string twice, decrypt
-	//changeLate changes the second cipher, changeEarly changes the first cipher
-	public String doubleDecrypt(String inString, boolean changeLate, boolean changeEarly) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
-		int pos = 0;
+	//Generating new key and encrypting "test" should not result in "V¢o˜å•¿×"
+	@Test
+	public void testMRThreeOne() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
+		hardTestEncrypt();
+		BufferedReader br = new BufferedReader(new FileReader("test.txt"));
+		String cipher = br.readLine();		//the original cipher
+		br.close();
+		setUpFile("test.txt", "test");
+
+		//test a new key encryption
+		TripleDES.encrypt(TripleDES.generateKey(), System.in, System.out);
+		br = new BufferedReader(new FileReader("test.txt"));
+		String newCipher = br.readLine();
+		assertTrue(!cipher.equals(newCipher));		//if failed, mutant killed
+		br.close();
+	}
+
+	//test a key similar to the real key with front ASCII value decreased by 1, should not be same
+	@Test
+	public void testMRThreeTwo() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IOException {
+		hardTestEncrypt();
+		BufferedReader br = new BufferedReader(new FileReader("test.txt"));
+		String cipher = br.readLine();		//the original cipher
+		br.close();
+		setUpFile("test.txt", "test");
+
+		//test a new key encryption
+		TripleDES.encrypt(TripleDES.readKey(new File("test1.key")), System.in, System.out);
+		br = new BufferedReader(new FileReader("test.txt"));
+		String newCipher = br.readLine();
+		assertTrue(!cipher.equals(newCipher));		//if failed, mutant killed
+		br.close();
+	}
+
+	//test a key similar to the real key with front ASCII value increased by 1, should not be same
+	@Test
+	public void testMRThreeThree() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IOException {
+		//generate correct cipher, read it in
+		hardTestEncrypt();
+		BufferedReader br = new BufferedReader(new FileReader("test.txt"));
+		String cipher = br.readLine();		//the original cipher
+		br.close();
+
+		//set System.in to "test" and System.out to the file test.txt
+		setUpFile("test.txt", "test");
+
+		//test a new key encryption
+		TripleDES.encrypt(TripleDES.readKey(new File("test2.key")), System.in, System.out);
+		br = new BufferedReader(new FileReader("test.txt"));
+		String newCipher = br.readLine();
+		assertTrue(!cipher.equals(newCipher));		//if failed, mutant killed
+		br.close();
+	}
+
+	//test a key similar to the real key with back ASCII value decreased by 1, should not be same
+	@Test
+	public void testMRThreeFour() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IOException {
+		hardTestEncrypt();
+		BufferedReader br = new BufferedReader(new FileReader("test.txt"));
+		String cipher = br.readLine();		//the original cipher
+		br.close();
+		setUpFile("test.txt", "test");
+
+		//test a new key encryption
+		TripleDES.encrypt(TripleDES.readKey(new File("test3.key")), System.in, System.out);
+		br = new BufferedReader(new FileReader("test.txt"));
+		String newCipher = br.readLine();
+		assertTrue(!cipher.equals(newCipher));		//if failed, mutant killed
+		br.close();
+	}
+
+	//test a key similar to the real key with back ASCII value increased by 1, should not be same
+	@Test
+	public void testMRThreeFive() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IOException {
+		hardTestEncrypt();
+		BufferedReader br = new BufferedReader(new FileReader("test.txt"));
+		String cipher = br.readLine();		//the original cipher
+		br.close();
+		setUpFile("test.txt", "test");
+
+		//test a new key encryption
+		TripleDES.encrypt(TripleDES.readKey(new File("test4.key")), System.in, System.out);
+		br = new BufferedReader(new FileReader("test.txt"));
+		String newCipher = br.readLine();
+		assertTrue(!cipher.equals(newCipher));		//if failed, mutant killed
+		br.close();
+	}
+
+	//generate and encrypt random string, use different key to decrypt, and make sure they are not equal
+	@Test
+	public void testMRThreeSix() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+		//generate and encrypt random string
 		key = TripleDES.generateKey();
-		setUpFile("test.txt", inString);
+		setUpFile("test.txt", genRandString());
 		TripleDES.encrypt(key, System.in, System.out);
 		BufferedReader br = new BufferedReader(new FileReader("test.txt"));
-		String cipher = br.readLine();
+		String cipher = br.readLine();		//the original cipher
 		br.close();
-		if (changeEarly) {										//changes the 1st cipher by one ascii value
-			char[] cArr = cipher.toCharArray();
-			pos = new Random().nextInt((cArr.length - 1));
-			int ascii = (int) cArr[pos];
-			cArr[pos] = (char) ascii++;
-			cipher = new String(cArr);
-		}
-		setUpFile("test.txt", cipher);
-		TripleDES.encrypt(key, System.in, System.out);
+
+		//make sure decrypting with different key is not the same
+		TripleDES.decrypt(TripleDES.generateKey(), System.in, System.out);
 		br = new BufferedReader(new FileReader("test.txt"));
-		String secondCipher = br.readLine();
+		String newCipher = br.readLine();
+		assertTrue(!cipher.equals(newCipher));		//if failed, mutant killed
 		br.close();
-		if (changeLate) {										//changes the 2nd cipher by one ascii value
-			char[] scArr = secondCipher.toCharArray();
-			if (!changeEarly) {
-				pos = new Random().nextInt((scArr.length - 1));
-			}
-			int ascii = (int) scArr[pos];
-			scArr[pos] = (char) ascii--;
-			cipher = new String(scArr);
-		}
-		setUpFile("test.txt", secondCipher);
-		TripleDES.decrypt(key, System.in, System.out);			//decrypt 2nd cipher
-		br = new BufferedReader(new FileReader("test.txt"));
-		cipher = br.readLine();
-		br.close();
-		setUpFile("test.txt", cipher);
-		TripleDES.decrypt(key, System.in, System.out);			//decrypt 1st cipher
-		br = new BufferedReader(new FileReader("test.txt"));
-		String plaintext = br.readLine();
-		br.close();
-		return plaintext;
 	}
 
-	//encrypt random string twice, change cipher by 1 character, decrypt, should not be same
-	@Test
-	public void testMRThreeFive() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
-		String plaintext = genRandString();
-		assertTrue(!doubleDecrypt(plaintext, true, false).equals(plaintext));
-	}
-
-	//repeat with new random string
-	@Test
-	public void testMRThreeSix() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
-		String plaintext = genRandString();
-		assertTrue(!doubleDecrypt(plaintext, true, false).equals(plaintext));
-	}
-
-	//encrypt random string, change cipher by 1 character, encrypt, decrypt twice, should not be same
+	//generate and decrypt random string, use different key to encrypt, and make sure they are not equal
 	@Test
 	public void testMRThreeSeven() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
-		String plaintext = genRandString();
-		assertTrue(!doubleDecrypt(plaintext, false, true).equals(plaintext));
-	}
-
-	//repeat with new random string
-	@Test
-	public void testMRThreeEight() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
-		String plaintext = genRandString();
-		assertTrue(!doubleDecrypt(plaintext, false, true).equals(plaintext));
-	}
-
-	//encrypt random string, increase cipher character by 1, encrypt, decrease character by 1, decrypt twice, compare original (should not be same)
-	@Test
-	public void testMRThreeNine() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
-		String plaintext = genRandString();
-		assertTrue(!doubleDecrypt(plaintext, true, true).equals(plaintext));
-	}
-
-	//repeat nine for a new random string
-	@Test
-	public void testMRThreeTen() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
-		String plaintext = genRandString();
-		assertTrue(!doubleDecrypt(plaintext, true, true).equals(plaintext));
-	}
-
-	/*	--> THESE TESTS FAIL DUE TO PROGRAM NOT HANDLING VERY LONG STRINGS; 2ND CIPHER TOO LONG TO DECRYPT ACCURATELY
-	//encrypt random string, change cipher by 1 character, encrypt, decrypt, should be same as changed cipher
-	//does not use helper method since checking cipher, not plaintext (essentially tests encrypt/decrypt but with a cipher, aka more complicated "plaintext")
-	@Test
-	public void testMRThreeNine() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
-		String plaintext = genRandString();
+		//generate and decrypt random string
 		key = TripleDES.generateKey();
-		setUpFile("test.txt", plaintext);
-		TripleDES.encrypt(key, System.in, System.out);
+		setUpFile("test.txt", genRandString());
+		TripleDES.decrypt(key, System.in, System.out);
 		BufferedReader br = new BufferedReader(new FileReader("test.txt"));
-		String cipher = br.readLine();
+		String cipher = br.readLine();		//the original cipher
 		br.close();
-		char[] cArr = cipher.toCharArray();
-		int pos = new Random().nextInt((cArr.length - 1));
-		int ascii = (int) cArr[pos];
-		cArr[pos] = (char) ascii++;									//change cipher by 1 ascii value
-		cipher = new String(cArr);
-		setUpFile("test.txt", cipher);
-		TripleDES.encrypt(key, System.in, System.out);				//encrypt the changed cipher
+
+		//make sure encrypting with different key is not the same
+		TripleDES.encrypt(TripleDES.generateKey(), System.in, System.out);
 		br = new BufferedReader(new FileReader("test.txt"));
-		String secondCipher = br.readLine();
+		String newCipher = br.readLine();
+		assertTrue(!cipher.equals(newCipher));		//if failed, mutant killed
 		br.close();
-		setUpFile("test.txt", secondCipher);
-		TripleDES.decrypt(key, System.in, System.out);				//decrypt the 2nd cipher
+	}
+
+	//repeat one with "mouse" for plaintext
+	@Test
+	public void testMRThreeEight() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IOException {
+		hardTestEncryptTwo();
+		BufferedReader br = new BufferedReader(new FileReader("test.txt"));
+		String cipher = br.readLine();		//the original cipher
+		br.close();
+		setUpFile("test.txt", "mouse");
+
+		//test a new key encryption
+		TripleDES.encrypt(TripleDES.generateKey(), System.in, System.out);
 		br = new BufferedReader(new FileReader("test.txt"));
-		String cipher2 = br.readLine();
-		assertTrue(cipher.equals(cipher2));							//since no change occurred, they should be equal
-	}
-	 
-	//encrypt "test" twice, decrypt result twice, should result in "test"
-	@Test
-	public void testMRThreeOne() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
-		assertTrue(doubleDecrypt("test", false, false).equals("test"));
+		String newCipher = br.readLine();
+		assertTrue(!cipher.equals(newCipher));		//if failed, mutant killed
+		br.close();
 	}
 
-	//similar as one, but with random string
+	//repeat two with "mouse" for plaintext
 	@Test
-	public void testMRThreeTwo() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
-		String plaintext = genRandString();
-		assertTrue(doubleDecrypt(plaintext, false, false).equals(plaintext));
+	public void testMRThreeNine() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IOException {
+		hardTestEncryptTwo();
+		BufferedReader br = new BufferedReader(new FileReader("test.txt"));
+		String cipher = br.readLine();		//the original cipher
+		br.close();
+		setUpFile("test.txt", "mouse");
+
+		//test a new key encryption
+		TripleDES.encrypt(TripleDES.readKey(new File("mouse1.key")), System.in, System.out);
+		br = new BufferedReader(new FileReader("test.txt"));
+		String newCipher = br.readLine();
+		assertTrue(!cipher.equals(newCipher));		//if failed, mutant killed
+		br.close();
 	}
 
-	//repeat two with new random string
+	//repeat three with "mouse" for plaintext
 	@Test
-	public void testMRThreeThree() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
-		String plaintext = genRandString();
-		assertTrue(!doubleDecrypt(plaintext, false, false).equals(plaintext));
+	public void testMRThreeTen() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IOException {
+		hardTestEncryptTwo();
+		BufferedReader br = new BufferedReader(new FileReader("test.txt"));
+		String cipher = br.readLine();		//the original cipher
+		br.close();
+		setUpFile("test2.txt", "mouse");	//setup new file for new cipher
+		System.out.flush();					//clear output in case anything left over
+		
+		//test a new key encryption
+		TripleDES.encrypt(TripleDES.readKey(new File("mouse2.key")), System.in, System.out);		//encrypt with a slightly different key
+		br = new BufferedReader(new FileReader("test2.txt"));
+		String newCipher = br.readLine();
+		assertTrue(!cipher.equals(newCipher));		//somehow still equal though key is slightly different
+		br.close();
 	}
-
-	//repeat with new random string
-	@Test
-	public void testMRThreeFour() throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException {
-		String plaintext = genRandString();
-		assertTrue(!doubleDecrypt(plaintext, false, false).equals(plaintext));
-	}
-	*/
-
 
 }

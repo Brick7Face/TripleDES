@@ -61,6 +61,12 @@ Questions:
  - it turns out that the same input on the same key does not always encrypt to the same thing; I think that the cipher is generated other ways (made more general)
  - in my MRs, it turns out that a similar key usage does in fact encrypt plaintexts to similar ciphers, though this is not true for decryption
  - PIT class file reverser eclipse plugin (for PIT mutants)
+
+Notes for next week:
+- figure out why MR three tests are failing
+- repeat 4 and 5 on MR three with mouse plaintext
+- try comparing strings as bytes rather than strings
+- look into Java Cipher class to see if keys become obsolete
 		
 
 

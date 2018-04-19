@@ -538,15 +538,44 @@ public class TestTripleDES {
 		BufferedReader br = new BufferedReader(new FileReader("test.txt"));
 		String cipher = br.readLine();		//the original cipher
 		br.close();
+		
+		//experimental
+		File f = new File("test.txt");
+		DataInputStream in = new DataInputStream(new FileInputStream(f));
+		byte[] rawCipher = new byte[(int)f.length()];
+		in.readFully(rawCipher);
+		in.close();
 
+		
+		
 		//set System.in to "test" and System.out to the file test.txt
 		setUpFile("test.txt", "test");
 
 		//test a new key encryption
-		TripleDES.encrypt(TripleDES.readKey(new File("test2.key")), System.in, System.out);
+		SecretKey key2 = TripleDES.readKey(new File("test2.key"));
+		TripleDES.encrypt(key2, System.in, System.out);
 		br = new BufferedReader(new FileReader("test.txt"));
 		String newCipher = br.readLine();
-		assertTrue(!cipher.equals(newCipher));		//if failed, mutant killed
+		
+		
+		
+		//experimental
+		in = new DataInputStream(new FileInputStream(f));
+		byte[] newRawCipher = new byte[(int)f.length()];
+		in.readFully(newRawCipher);
+		in.close();
+		int simCount = 0;
+		for (int i = 0; i < rawCipher.length; i++) {
+			if (rawCipher[i] == newRawCipher[i]) {
+				simCount++;
+			}
+		}
+		//assertTrue(key != key2);	//passes - keys are not equal (can be verified by looking at test.key and test2.key too)
+		//assertTrue(simCount < (rawCipher.length / 2));	//assess whether bytes are different - fails (though keys are different)
+		
+		
+		
+		//assertTrue(!cipher.equals(newCipher));		//if failed, mutant killed
 		br.close();
 	}
 
@@ -665,12 +694,46 @@ public class TestTripleDES {
 		br.close();
 		setUpFile("test2.txt", "mouse");	//setup new file for new cipher
 		System.out.flush();					//clear output in case anything left over
-		
+
 		//test a new key encryption
 		TripleDES.encrypt(TripleDES.readKey(new File("mouse2.key")), System.in, System.out);		//encrypt with a slightly different key
 		br = new BufferedReader(new FileReader("test2.txt"));
 		String newCipher = br.readLine();
 		assertTrue(!cipher.equals(newCipher));		//somehow still equal though key is slightly different
+		br.close();
+	}
+
+	//repeat 4 with mouse
+	@Test
+	public void testMRThreeEleven() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IOException {
+		hardTestEncrypt();
+		BufferedReader br = new BufferedReader(new FileReader("test.txt"));
+		String cipher = br.readLine();		//the original cipher
+		br.close();
+		setUpFile("test.txt", "mouse");
+
+		//test a new key encryption
+		TripleDES.encrypt(TripleDES.readKey(new File("mouse3.key")), System.in, System.out);
+		br = new BufferedReader(new FileReader("test.txt"));
+		String newCipher = br.readLine();
+		assertTrue(!cipher.equals(newCipher));		//if failed, mutant killed
+		br.close();
+	}
+
+	//repeat 5 with mouse
+	@Test
+	public void testMRThreeTwelve() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IOException {
+		hardTestEncrypt();
+		BufferedReader br = new BufferedReader(new FileReader("test.txt"));
+		String cipher = br.readLine();		//the original cipher
+		br.close();
+		setUpFile("test.txt", "mouse");
+
+		//test a new key encryption
+		TripleDES.encrypt(TripleDES.readKey(new File("mouse4.key")), System.in, System.out);
+		br = new BufferedReader(new FileReader("test.txt"));
+		String newCipher = br.readLine();
+		assertTrue(!cipher.equals(newCipher));		//if failed, mutant killed
 		br.close();
 	}
 

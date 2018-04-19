@@ -52,20 +52,19 @@ MRs
 			4. use key "L³ï\n¿˜ã«1Rº|*8*\n4/7z¾"	//test back edge case					 -- this fails
 			5. use key "L³ï\n¿˜ã«1Rº|*8*\n4/7zÀ"	//test back edge case					 -- this fails
 			6. encrypt random string, decrypt using different key, not equal			-- fails
-			7. decrypt random string, encrypt using different key, not equal
-			8. repeat 1 for "mouse"
-			9. repeat 2 for "mouse"
+			7. decrypt random string, encrypt using different key, not equal			-- passes
+			8. repeat 1 for "mouse"														-- passes
+			9. repeat 2 for "mouse"														-- passes
 			10. repeat 3 for "mouse"													-- fails
+			11. repeat 4 for "mouse"													-- passes
+			12. repeat 5 for "mouse"													-- passes
 			
 Questions:
- - it turns out that the same input on the same key does not always encrypt to the same thing; I think that the cipher is generated other ways (made more general)
- - in my MRs, it turns out that a similar key usage does in fact encrypt plaintexts to similar ciphers, though this is not true for decryption
+ - how long would it be necessary to store keys? They'd probably be able to last, theoretically?
  - PIT class file reverser eclipse plugin (for PIT mutants)
 
 Notes for next week:
 - figure out why MR three tests are failing
-- repeat 4 and 5 on MR three with mouse plaintext
-- try comparing strings as bytes rather than strings
 - look into Java Cipher class to see if keys become obsolete
 		
 

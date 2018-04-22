@@ -51,7 +51,7 @@ MRs
 			3. use key "M³ï\n¿˜ã«1Rº|*8*\n4/7z¿"	//test front edge case					 -- this fails
 			4. use key "L³ï\n¿˜ã«1Rº|*8*\n4/7z¾"	//test back edge case					 -- this fails
 			5. use key "L³ï\n¿˜ã«1Rº|*8*\n4/7zÀ"	//test back edge case					 -- this fails
-			6. encrypt random string, decrypt using different key, not equal			-- fails
+			6. encrypt random string, decrypt using different key, not equal			-- passes
 			7. decrypt random string, encrypt using different key, not equal			-- passes
 			8. repeat 1 for "mouse"														-- passes
 			9. repeat 2 for "mouse"														-- passes
@@ -60,12 +60,20 @@ MRs
 			12. repeat 5 for "mouse"													-- passes
 			
 Questions:
- - how long would it be necessary to store keys? They'd probably be able to last, theoretically?
+ - failing tests?
+ - run mutants?
  - PIT class file reverser eclipse plugin (for PIT mutants)
 
-Notes for next week:
+Notes:
 - figure out why MR three tests are failing
-- look into Java Cipher class to see if keys become obsolete
-		
+	- tried comparing ascii values, individual bytes - still failed
+	- made sure key files were different, keys were different
+	- made sure the actual output in test.txt was the same as that being read in
+		- files clear before new writing is done, so accidentally reading isn't an issue
+		- System.out buffer is cleared before writing new things, so accidentally writing the same thing isn't an issue
+	- followed process in source code; couldn't find where it might go wrong (works for all other tests, too)
+	- Java cipher libraries don't indicate keys becoming obsolete - keys must be of a certain length, but test keys are
 
+- generated key, increased/decreased ascii values in code (rather than manually), now works mostly
+	- some similar keys with modified ascii values still produce same ciphers/plaintexts (for example, : and ; in key produce same results)
 

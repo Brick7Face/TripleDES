@@ -8,6 +8,8 @@
  * visit http://www.davidflanagan.com/javaexamples2.
  */
 
+ 
+ //THIS CODE DOES NOT SEEM TO WORK CORRECTLY WITH MY TEST SUITE
 package tdes;
 
 import javax.crypto.*;

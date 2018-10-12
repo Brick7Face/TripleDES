@@ -3,5 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="D:/Nate/Eclipse Projects/.jar Files/commons-codec-1.11-bin/commons-codec-1.11/commons-codec-1.11.jar"/>
+	<classpathentry kind="lib" path="D:/Nate/Eclipse Projects/.jar Files/bcprov-ext-jdk15on-159.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
